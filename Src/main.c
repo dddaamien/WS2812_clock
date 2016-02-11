@@ -1,102 +1,73 @@
-/**
-  ******************************************************************************
-  * File Name          : main.c
-  * Description        : Main program body
-  ******************************************************************************
-  *
-  * COPYRIGHT(c) 2016 STMicroelectronics
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-/* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
+#include <stdint-gcc.h>
+#include <time.h>
+#include "WS2812.h"
 
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private variables ---------------------------------------------------------*/
 RTC_HandleTypeDef hrtc;
 
-PCD_HandleTypeDef hpcd_USB_FS;
 
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
+void delay_cycles(int nbCycles);
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_RTC_Init(void);
-static void MX_USB_PCD_Init(void);
 
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-
-/* USER CODE END PFP */
-
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
 
 int main(void)
 {
+	RTC_TimeTypeDef sTime;
+//	uint8_t clockDisp[180]={0};
+	struct structWs2812GRB clockDisp[60];
+	struct structWs2812GRB hhColor, minColor, secColor;
 
-  /* USER CODE BEGIN 1 */
+	HAL_Init();
+	SystemClock_Config();
+	MX_GPIO_Init();
+	MX_RTC_Init();
 
-  /* USER CODE END 1 */
+	struct structWs2812HSV Shsv={90,127,127};
+	HSVtoRGB(&hhColor,&Shsv);
+	Shsv.hue=30;//={30,127,127};
+	Shsv.saturation=127;
+	Shsv.value=127;
+	HSVtoRGB(&minColor,&Shsv);
+	Shsv.hue=230;
+	Shsv.saturation=127;
+	Shsv.value=127;
+	HSVtoRGB(&secColor,&Shsv);
 
-  /* MCU Configuration----------------------------------------------------------*/
+	sTime.Hours = 16;
+	sTime.Minutes = 15;
+	sTime.Seconds = 0;
+	HAL_RTC_SetTime(&hrtc,&sTime,RTC_FORMAT_BIN);
+	while (1)
+	{
+		/*HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_RESET);
+		GPIOC->BSRR = GPIO_PIN_13;
+		GPIOC->BSRR = (uint32_t)GPIO_PIN_13 << 16;*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+		ws2812_sendarray(&clockDisp,180);
+		HAL_Delay(500);
+		for(int i=0;i<60;++i)
+		{
+			clockDisp[i].red=0;//rand() % 0xFF;
+			clockDisp[i].green=0;
+			clockDisp[i].blue=0;
+		}
 
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_RTC_Init();
-  MX_USB_PCD_Init();
-
-  /* USER CODE BEGIN 2 */
-
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
-	  HAL_Delay(100);
-  }
-  /* USER CODE END 3 */
-
+		HAL_RTC_GetTime(&hrtc,&sTime,RTC_FORMAT_BIN);
+		clockDisp[sTime.Seconds] = secColor;
+		clockDisp[sTime.Minutes] = minColor;
+		clockDisp[((sTime.Hours) % 12) * 5] = hhColor;
+	}
 }
 
+
+
+void delay_cycles(int nbCycles)
+{
+	while(--nbCycles);
+}
 /** System Clock Configuration
 */
 void SystemClock_Config(void)
@@ -151,35 +122,21 @@ void MX_RTC_Init(void)
   hrtc.Init.OutPut = RTC_OUTPUTSOURCE_NONE;
   HAL_RTC_Init(&hrtc);
 
-  sTime.Hours = 0x1;
-  sTime.Minutes = 0x0;
+  sTime.Hours = 12;
+  sTime.Minutes = 10;
   sTime.Seconds = 0x0;
 
   HAL_RTC_SetTime(&hrtc, &sTime, FORMAT_BCD);
 
   DateToUpdate.WeekDay = RTC_WEEKDAY_MONDAY;
   DateToUpdate.Month = RTC_MONTH_JANUARY;
-  DateToUpdate.Date = 0x1;
-  DateToUpdate.Year = 0x0;
+  DateToUpdate.Date = 30;
+  DateToUpdate.Year = 16;
 
   HAL_RTC_SetDate(&hrtc, &DateToUpdate, FORMAT_BCD);
 
 }
 
-/* USB init function */
-void MX_USB_PCD_Init(void)
-{
-
-  hpcd_USB_FS.Instance = USB;
-  hpcd_USB_FS.Init.dev_endpoints = 8;
-  hpcd_USB_FS.Init.speed = PCD_SPEED_FULL;
-  hpcd_USB_FS.Init.ep0_mps = DEP0CTL_MPS_8;
-  hpcd_USB_FS.Init.low_power_enable = DISABLE;
-  hpcd_USB_FS.Init.lpm_enable = DISABLE;
-  hpcd_USB_FS.Init.battery_charging_enable = DISABLE;
-  HAL_PCD_Init(&hpcd_USB_FS);
-
-}
 
 /** Configure pins as 
         * Analog 
@@ -199,17 +156,23 @@ void MX_GPIO_Init(void)
   __GPIOB_CLK_ENABLE();
   __GPIOA_CLK_ENABLE();
 
-  /*Configure GPIO pin : LedR_Pin */
+  /*Configure GPIO pin : LedR_Pin
   GPIO_InitStruct.Pin = LedR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
-  HAL_GPIO_Init(LedR_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH; //GPIO_SPEED_LOW;
+  HAL_GPIO_Init(LedR_GPIO_Port, &GPIO_InitStruct);*/
 
-  /*Configure GPIO pin : PB2 */
+  /*Configure GPIO pin : PB4 */
+    GPIO_InitStruct.Pin = GPIO_PIN_4;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB2
   GPIO_InitStruct.Pin = GPIO_PIN_2;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);*/
 
 }
 
