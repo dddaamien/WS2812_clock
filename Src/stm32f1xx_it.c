@@ -36,10 +36,11 @@
 #include "stm32f1xx_it.h"
 
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern RTC_HandleTypeDef hrtc;
+extern UART_HandleTypeDef huart2;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
@@ -51,11 +52,9 @@
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
-
   /* USER CODE END NonMaskableInt_IRQn 0 */
   HAL_RCC_NMI_IRQHandler();
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
@@ -65,12 +64,10 @@ void NMI_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -81,7 +78,54 @@ void SysTick_Handler(void)
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
 
-/* USER CODE BEGIN 1 */
+/**
+* @brief This function handles RTC global interrupt.
+*/
+void RTC_IRQHandler(void)
+{
+  /* USER CODE BEGIN RTC_IRQn 0 */
+  /* USER CODE END RTC_IRQn 0 */
+  HAL_RTCEx_RTCIRQHandler(&hrtc);
+  /* USER CODE BEGIN RTC_IRQn 1 */
+  /* USER CODE END RTC_IRQn 1 */
+}
 
+/**
+* @brief This function handles RCC global interrupt.
+*/
+void RCC_IRQHandler(void)
+{
+  /* USER CODE BEGIN RCC_IRQn 0 */
+  /* USER CODE END RCC_IRQn 0 */
+  /* USER CODE BEGIN RCC_IRQn 1 */
+  /* USER CODE END RCC_IRQn 1 */
+}
+
+/**
+* @brief This function handles EXTI line2 interrupt.
+*/
+void EXTI2_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_IRQn 0 */
+	HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
+  /* USER CODE END EXTI2_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+  /* USER CODE BEGIN EXTI2_IRQn 1 */
+  /* USER CODE END EXTI2_IRQn 1 */
+}
+
+/**
+* @brief This function handles USART2 global interrupt.
+*/
+void USART2_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART2_IRQn 0 */
+  /* USER CODE END USART2_IRQn 0 */
+  HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART2_IRQn 1 */
+  /* USER CODE END USART2_IRQn 1 */
+}
+
+/* USER CODE BEGIN 1 */
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

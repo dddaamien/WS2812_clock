@@ -10,8 +10,8 @@
 #define ws2812_port_set ((uint32_t*)&GPIOB->BSRR)	// Adresse port set
 #define ws2812_port_clr	((uint32_t*)&GPIOB->BRR)	// Adresse port reset
 
-#define ws2812_mask_set  GPIO_PIN_4		// Bitmask set pin
-#define ws2812_mask_clr  GPIO_PIN_4		// Bitmask clear pin
+#define ws2812_mask_set  GPIO_PIN_7		// Bitmask set pin
+#define ws2812_mask_clr  GPIO_PIN_7		// Bitmask clear pin
 
 struct structWs2812GRB
 {
