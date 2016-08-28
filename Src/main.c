@@ -74,7 +74,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	HAL_UART_Transmit(&huart2,datDebug,sizeof(datDebug),100);
+	//HAL_UART_Transmit(&huart2,datDebug,sizeof(datDebug),100);
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -96,13 +96,18 @@ int main(void)
   MX_NVIC_Init();
 
   /* USER CODE BEGIN 2 */
+  //__HAL_UART_ENABLE_IT(&huart2,HAL_UART_RxCpltCallback);
+  HAL_UART_Receive_IT(&huart2,datDebug,7);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while(1)
   {
+//	  HAL_UART_Transmit_IT(&huart2,datDebug,strlen(datDebug));
 
+	  HAL_Delay(500);
+	  HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
   }
   /* USER CODE END WHILE */
 

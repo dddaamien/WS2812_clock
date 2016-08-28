@@ -36,6 +36,7 @@
 #include "stm32f1xx_it.h"
 
 /* USER CODE BEGIN 0 */
+extern char datDebug[];
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -124,7 +125,6 @@ void EXTI2_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-	HAL_UART_Transmit(&huart2,"IRQusart2\n",10,100);
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
@@ -132,5 +132,10 @@ void USART2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+//	sprintf(datDebug,"%s rx_complete\n",datDebug);
+	HAL_UART_Transmit_IT(huart,datDebug,strlen(datDebug));
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
