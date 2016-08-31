@@ -57,6 +57,7 @@ void SysTick_Handler(void);
 void RTC_IRQHandler(void);
 void RCC_IRQHandler(void);
 void EXTI2_IRQHandler(void);
+void DMA1_Channel7_IRQHandler(void);
 void USART2_IRQHandler(void);
 
 #ifdef __cplusplus
