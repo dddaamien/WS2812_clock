@@ -35,6 +35,8 @@
 
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include <errno.h>
+#include "WS2812.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -47,7 +49,7 @@ TIM_HandleTypeDef htim4;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-//uint16_t temps=100;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,10 +66,29 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
                 
 
 /* USER CODE BEGIN PFP */
+caddr_t _sbrk(int incr)
+{
+  extern char _ebss; // Defined by the linker
+  static char *heap_end;
+  char *prev_heap_end;
+  if (heap_end == 0)
+  {
+    heap_end = &_ebss;
+  }
+  prev_heap_end = heap_end;
+  char * stack = (char*) __get_MSP();
+  if (heap_end + incr > stack)
+  {
+    errno = ENOMEM;
+//    return (caddr_t) —1;
+  }
+  heap_end += incr;
+  return (caddr_t) prev_heap_end;
+}
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-char datDebug[50] = "Ligne de debogage";
+char datDebug[30] = "Ligne de debogage";
 /* USER CODE END 0 */
 
 int main(void)
@@ -96,18 +117,23 @@ int main(void)
   MX_NVIC_Init();
 
   /* USER CODE BEGIN 2 */
-  //__HAL_UART_ENABLE_IT(&huart2,HAL_UART_RxCpltCallback);
-  HAL_UART_Receive_IT(&huart2,datDebug,7);
+  uint16_t adcDat[2];
+  HAL_UART_Receive_IT(&huart2,datDebug,1);
+  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,1);
+//  HAL_ADC_Start_DMA(&hadc1,(uint32_t*)adcDat,2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while(1)
   {
-//	  HAL_UART_Transmit_IT(&huart2,datDebug,strlen(datDebug));
 
-	  HAL_Delay(500);
-	  HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
+	  if((HAL_GetTick()%100) == 0)
+	  {
+		  HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
+		  sprintf(datDebug,"coucou petit oiseau! %lu\n",HAL_GetTick());
+		  HAL_UART_Transmit(&huart2,datDebug,strlen(datDebug),10);
+	  }
   }
   /* USER CODE END WHILE */
 
@@ -173,10 +199,10 @@ static void MX_NVIC_Init(void)
   HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(USART2_IRQn);
   /* EXTI2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(EXTI2_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI2_IRQn);
   /* RTC_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(RTC_IRQn, 2, 0);
+  HAL_NVIC_SetPriority(RTC_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(RTC_IRQn);
 }
 
