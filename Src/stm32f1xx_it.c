@@ -86,7 +86,7 @@ void SysTick_Handler(void)
 void RTC_IRQHandler(void)
 {
   /* USER CODE BEGIN RTC_IRQn 0 */
-	HAL_UART_Transmit(&huart2,"IRQrtc\n",7,100);
+//	HAL_UART_Transmit(&huart2,"IRQrtc\n",7,100);
   /* USER CODE END RTC_IRQn 0 */
   HAL_RTCEx_RTCIRQHandler(&hrtc);
   /* USER CODE BEGIN RTC_IRQn 1 */
@@ -99,7 +99,7 @@ void RTC_IRQHandler(void)
 void RCC_IRQHandler(void)
 {
   /* USER CODE BEGIN RCC_IRQn 0 */
-	HAL_UART_Transmit(&huart2,"IRQrcc\n",7,100);
+//	HAL_UART_Transmit(&huart2,"IRQrcc\n",7,100);
   /* USER CODE END RCC_IRQn 0 */
   /* USER CODE BEGIN RCC_IRQn 1 */
   /* USER CODE END RCC_IRQn 1 */
@@ -111,7 +111,6 @@ void RCC_IRQHandler(void)
 void EXTI2_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_IRQn 0 */
-	HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
 	HAL_UART_Transmit(&huart2,"IRQexti2\n",9,100);
   /* USER CODE END EXTI2_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
